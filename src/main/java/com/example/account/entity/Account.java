@@ -37,6 +37,9 @@ public class Account {
 
     @Column(name = "available_balance", nullable = false)
     private BigDecimal availableBalance;
+    
+    @Column(name = "ledger_balance", nullable = false)
+    private BigDecimal ledgerBalance;
 
     public Long getId() {
         return id;
@@ -96,5 +99,13 @@ public class Account {
 
     public void setAvailableBalance(BigDecimal availableBalance) {
         this.availableBalance = availableBalance;
+    }
+    
+    public BigDecimal getLedgerBalance() {
+        return ledgerBalance;
+    }
+
+    public void setLedgerBalance(BigDecimal ledgerBalance) {
+        this.ledgerBalance = ledgerBalance;
     }
 }

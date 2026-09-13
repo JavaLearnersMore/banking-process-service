@@ -20,9 +20,10 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
 
-            .authorizeHttpRequests(auth -> auth.antMatchers("/core/api/v1/accounts").hasAnyRole("SERVICE", "OPS")
-                .anyRequest()
-                .authenticated()
+            .authorizeHttpRequests(auth -> auth
+            	    .antMatchers("/accounts", "/accounts/**").permitAll()
+            	    .antMatchers("/core/api/v1/accounts").permitAll()
+            	    .anyRequest().authenticated()
             )
 
             .httpBasic(Customizer.withDefaults());

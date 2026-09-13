@@ -11,6 +11,7 @@ public class AccountResponse {
     private String accountType;
     private String status;
     private BigDecimal availableBalance;
+    private BigDecimal ledgerBalance;
 
     public AccountResponse(
             String accountNumber,
@@ -19,7 +20,8 @@ public class AccountResponse {
             String ifsc,
             String accountType,
             String status,
-            BigDecimal availableBalance) {
+            BigDecimal availableBalance,
+            BigDecimal ledgerBalance) {
 
         this.accountNumber = accountNumber;
         this.ownerType = ownerType;
@@ -28,6 +30,7 @@ public class AccountResponse {
         this.accountType = accountType;
         this.status = status;
         this.availableBalance = availableBalance;
+        this.ledgerBalance = ledgerBalance;
     }
 
     public String getAccountNumber() {
@@ -56,5 +59,9 @@ public class AccountResponse {
 
     public BigDecimal getAvailableBalance() {
         return availableBalance;
+    }
+    
+    public BigDecimal getLedgerBalance() {
+        return ledgerBalance;
     }
 }
