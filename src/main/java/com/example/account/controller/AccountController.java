@@ -1,14 +1,21 @@
 package com.example.account.controller;
 
+
+
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.example.account.dto.AccountRequest;
 import com.example.account.dto.AccountResponse;
@@ -16,7 +23,7 @@ import com.example.account.service.AccountService;
 
 
 @RestController
-@RequestMapping("/core/api/v1/accounts")
+@RequestMapping("/core/api/v1")
 public class AccountController {
 
 	private final AccountService accountService;
@@ -25,7 +32,7 @@ public class AccountController {
 		this.accountService = accountService;
 	}
 	
-	@PostMapping
+	@PostMapping("/accounts")
 	public ResponseEntity<AccountResponse> createAccount(@Valid @RequestBody AccountRequest request) {
 
         AccountResponse response = accountService.createAccount(request);
