@@ -54,4 +54,21 @@ public class AccountService {
                 savedAccount.getLedgerBalance()
         );
     }
+    @Transactional(readOnly = true)
+    public AccountResponse getBalance(String accountNumber) {
+
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Account not found: " + accountNumber));
+
+        return new AccountResponse(
+                account.getAccountNumber(),
+                account.getOwnerType(),
+                account.getOwnerRefId(),
+                account.getIfsc(),
+                account.getAccountType(),
+                account.getStatus(),
+                account.getAvailableBalance(),
+                account.getLedgerBalance()
+        );
+    }
 }
