@@ -11,12 +11,15 @@ body {
     width: 100%;
     padding: 20px;
     box-sizing: border-box;
+    flex-wrap: wrap;
 }
 
 .account-section {
     width: 420px;
-    flex-shrink: 0;
+    flex: 0 0 420px;
+    box-sizing: border-box;
 }
+
 
 .account-form-container {
     width: 100%;

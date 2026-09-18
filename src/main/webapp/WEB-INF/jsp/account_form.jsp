@@ -98,9 +98,64 @@
         </div>
 
     </div>
+    
+    <!-- POST TRANSACTION FORM -->
+<div class="account-section">
 
+    <div class="account-form-container">
+
+        <h2>Post Transaction</h2>
+
+        <form id="transactionForm">
+
+            <label>External Reference</label>
+            <input type="text" id="externalRef" name="externalRef" placeholder="PGTXN20260823101500ABCDEF" required>
+
+            <label>Debit Account</label>
+            <input type="text" id="debitAccount" name="debitAccount" placeholder="AC1000200030" required>
+
+            <label>Credit Account</label>
+            <input type="text" id="creditAccount" name="creditAccount"  placeholder="Credit Account" required>
+
+            <label>Amount</label>
+            <input type="number" id="amount" name="amount" step="0.01"
+                   min="0.01"
+                   placeholder="Amount"
+                   required>
+
+            <label>Transaction Type</label>
+            <select id="transactionType"
+                    name="transactionType"
+                    required>
+
+                <option value="">Select Transaction Type</option>
+                <option value="PG_DEBIT">PG_DEBIT</option>
+				<option value="PG_CREDIT">PG_CREDIT</option>
+				<option value="NETBANKING">NETBANKING</option>
+				<option value="NEFT">NEFT</option>
+				<option value="IMPS">IMPS</option>
+				<option value="REFUND">REFUND</option>
+				<option value="CHARGEBACK">CHARGEBACK</option>
+				<option value="FEE">FEE</option>
+				<option value="ADJUSTMENT">ADJUSTMENT</option>
+
+            </select>
+
+            <label>Narration</label>
+            <input type="text" id="narration" name="narration" placeholder="Payment for order ORD-2026-000123"
+                   required>
+
+            <button type="submit"> Post Transaction</button>
+
+        </form>
+
+        <div id="transactionResponseMessage"
+             class="response-message">
+        </div>
+    </div>
 </div>
-
+ 
+</div>
 
 <script>
 
@@ -242,6 +297,98 @@ document.getElementById("balanceForm").addEventListener("submit", function(event
     });
 
 });
+
+/* POST TRANSACTION API */
+
+document.getElementById("transactionForm")
+    .addEventListener("submit", function(event) {
+
+        event.preventDefault();
+
+        const transactionData = {
+
+            externalRef:
+                document.getElementById("externalRef").value,
+
+            debitAccount:
+                document.getElementById("debitAccount").value,
+
+            creditAccount:
+                document.getElementById("creditAccount").value,
+
+            amount:
+                Number(
+                    document.getElementById("amount").value
+                ),
+
+            type:
+                document.getElementById("transactionType").value,
+
+            narration:
+                document.getElementById("narration").value
+        };
+
+
+        fetch(
+            "${pageContext.request.contextPath}/core/api/v1/transactions/post",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(transactionData)
+            }
+        )
+
+        .then(async response => {
+
+            const data = await response.json();
+
+            console.log(
+                "Transaction API Response:",
+                data
+            );
+
+
+            if (response.ok) {
+
+                document.getElementById(
+                    "transactionResponseMessage"
+                ).innerHTML =
+                    "<h3>Transaction Posted Successfully</h3>" +
+                    "<pre>" +
+                    JSON.stringify(data, null, 2) +
+                    "</pre>";
+
+            } else {
+
+                document.getElementById(
+                    "transactionResponseMessage" ).innerHTML =
+                    "<h3>Transaction Failed</h3>" +
+                    "<pre>" +
+                    JSON.stringify(data, null, 2) +
+                    "</pre>";
+            }
+
+        })
+
+        .catch(error => {
+
+            console.error(
+                "Transaction Error:",
+                error
+            );
+
+            document.getElementById( "transactionResponseMessage").innerHTML =
+                "<h3>Request Failed</h3>" +
+                "<pre>" +
+                error.message +
+                "</pre>";
+        });
+
+    });
 
 </script>
 
