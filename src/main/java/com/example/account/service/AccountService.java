@@ -1,23 +1,35 @@
 package com.example.account.service;
 
 import com.example.account.dto.AccountRequest;
+
 import com.example.account.dto.AccountResponse;
+import com.example.account.dto.StatementResponse;
 import com.example.account.entity.Account;
 import com.example.account.exception.AccountAlreadyExistsException;
 import com.example.account.repository.AccountRepository;
+import com.example.account.repository.LedgerEntryRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Service
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    
+    private final LedgerEntryRepository ledgerEntryRepository;
 
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(
+            AccountRepository accountRepository,
+            LedgerEntryRepository ledgerEntryRepository) {
+
         this.accountRepository = accountRepository;
+        this.ledgerEntryRepository = ledgerEntryRepository;
     }
 
     @Transactional
@@ -70,5 +82,19 @@ public class AccountService {
                 account.getAvailableBalance(),
                 account.getLedgerBalance()
         );
+    }
+    
+    public Page<StatementResponse> getStatement(
+            String accountNumber,
+            Pageable pageable) {
+
+        return ledgerEntryRepository.findByAccount_AccountNumber(accountNumber, pageable).map(entry -> new StatementResponse(
+                        entry.getEntryType(),
+                        entry.getAmount(),
+                        entry.getBalanceAfter(),
+                        entry.getNarration(),
+                        entry.getExternalRef(),
+                        entry.getCreatedAt()
+                ));
     }
 }

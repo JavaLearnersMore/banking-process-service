@@ -1,9 +1,11 @@
 package com.example.account.controller;
 
-
-
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.example.account.dto.AccountRequest;
 import com.example.account.dto.AccountResponse;
+import com.example.account.dto.StatementResponse;
 import com.example.account.service.AccountService;
 
 
@@ -48,5 +51,11 @@ public class AccountController {
 	        AccountResponse response = accountService.getBalance(accountNumber);
 
 	        return ResponseEntity.ok(response);
-	    }
+	 }
+	
+	@GetMapping("/accounts/{accountNumber}/statement")
+	public Page<StatementResponse> getStatement( @PathVariable String accountNumber, @PageableDefault(size = 2) Pageable pageable) {
+
+	    return accountService.getStatement(accountNumber, pageable);
+	}
 }

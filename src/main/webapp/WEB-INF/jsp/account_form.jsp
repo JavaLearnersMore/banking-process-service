@@ -154,6 +154,36 @@
         </div>
     </div>
 </div>
+
+<!-- ACCOUNT STATEMENT FORM -->
+<div class="statement-section">
+
+    <div class="account-form-container">
+
+        <h2>Account Statement</h2>
+
+        <form id="statementForm">
+
+            <label>Account Number</label>
+            <input type="text"
+                   id="statementAccountNumber"
+                   name="statementAccountNumber"
+                   placeholder="AC1000200030"
+                   required>
+
+            <button type="submit">
+                Get Statement
+            </button>
+
+        </form>
+
+        <div id="statementResponseMessage"
+             class="response-message">
+        </div>
+
+    </div>
+
+</div>
  
 </div>
 
@@ -382,6 +412,82 @@ document.getElementById("transactionForm")
             );
 
             document.getElementById( "transactionResponseMessage").innerHTML =
+                "<h3>Request Failed</h3>" +
+                "<pre>" +
+                error.message +
+                "</pre>";
+        });
+
+    });
+    
+/* ACCOUNT STATEMENT API */
+
+document.getElementById("statementForm")
+    .addEventListener("submit", function(event) {
+
+        event.preventDefault();
+
+        const accountNumber =
+            document.getElementById("statementAccountNumber").value;
+
+        const url =
+            "${pageContext.request.contextPath}/core/api/v1/accounts/"
+            + encodeURIComponent(accountNumber)
+            + "/statement";
+
+
+        fetch(url, {
+
+            method: "GET",
+
+            headers: {
+                "Content-Type": "application/json"
+            }
+
+        })
+
+        .then(async response => {
+
+            const data = await response.json();
+
+            console.log(
+                "Statement API Response:",
+                data
+            );
+
+            if (response.ok) {
+
+                document.getElementById(
+                    "statementResponseMessage"
+                ).innerHTML =
+                    "<h3>Account Statement</h3>" +
+                    "<pre>" +
+                    JSON.stringify(data, null, 2) +
+                    "</pre>";
+
+            } else {
+
+                document.getElementById(
+                    "statementResponseMessage"
+                ).innerHTML =
+                    "<h3>Failed to Get Statement</h3>" +
+                    "<pre>" +
+                    JSON.stringify(data, null, 2) +
+                    "</pre>";
+            }
+
+        })
+
+        .catch(error => {
+
+            console.error(
+                "Statement Error:",
+                error
+            );
+
+            document.getElementById(
+                "statementResponseMessage"
+            ).innerHTML =
                 "<h3>Request Failed</h3>" +
                 "<pre>" +
                 error.message +

@@ -20,7 +20,6 @@ body {
     box-sizing: border-box;
 }
 
-
 .account-form-container {
     width: 100%;
     box-sizing: border-box;
@@ -101,4 +100,20 @@ body {
     color: white;
     border: 1px solid #555;
     border-radius: 5px;
+}
+
+/* ACCOUNT STATEMENT */
+
+.statement-section {
+    width: 500px;
+    flex: 0 0 500px;
+}
+
+.statement-section .account-form-container {
+    width: 100%;
+}
+
+.statement-section .response-message pre {
+    max-height: 500px;
+    overflow-y: auto;
 }
