@@ -6,6 +6,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.example.account.dto.ApiResponse;
+
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -122,4 +124,72 @@ public class GlobalExceptionHandler {
                 .status(status)
                 .body(response);
     }
+    
+    @ExceptionHandler(TransactionNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleTransactionNotFound(
+            TransactionNotFoundException ex) {
+
+        ApiResponse response = new ApiResponse(
+                false,
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage(),
+                null
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(response);
+    }
+
+
+    @ExceptionHandler(InvalidTransactionStatusException.class)
+    public ResponseEntity<ApiResponse> handleInvalidTransactionStatus(
+            InvalidTransactionStatusException ex) {
+
+        ApiResponse response = new ApiResponse(
+                false,
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                null
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
+
+    @ExceptionHandler(TransactionAlreadyReversedException.class)
+    public ResponseEntity<ApiResponse> handleAlreadyReversed(
+            TransactionAlreadyReversedException ex) {
+
+        ApiResponse response = new ApiResponse(
+                false,
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage(),
+                null
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(response);
+    }
+
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse> handleGenericException(
+            Exception ex) {
+
+        ApiResponse response = new ApiResponse(
+                false,
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal server error",
+                null
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(response);
+    }
+
 }

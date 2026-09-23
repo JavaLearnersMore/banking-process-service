@@ -9,4 +9,6 @@ import com.example.account.entity.TransactionGroup;
 public interface TransactionGroupRepository extends JpaRepository<TransactionGroup, Long> {
 
     Optional<TransactionGroup> findByExternalRef(String externalRef);
+    
+    boolean existsByExternalRef(String externalRef);
 }

@@ -1,6 +1,8 @@
 package com.example.account.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -13,9 +15,15 @@ import com.example.account.entity.LedgerEntry;
 import com.example.account.entity.TransactionGroup;
 import com.example.account.exception.AccountNotFoundException;
 import com.example.account.exception.InsufficientFundsException;
+import com.example.account.exception.InvalidTransactionStatusException;
+import com.example.account.exception.TransactionAlreadyReversedException;
+import com.example.account.exception.TransactionNotFoundException;
 import com.example.account.repository.AccountRepository;
 import com.example.account.repository.LedgerEntryRepository;
 import com.example.account.repository.TransactionGroupRepository;
+import com.example.account.entity.TransactionStatus;
+import com.example.account.entity.EntryType;
+
 
 @Service
 public class TransactionService {
@@ -160,8 +168,8 @@ public class TransactionService {
 
         transactionGroup.setType(
                 request.getType());
-
-        transactionGroup.setStatus("POSTED");
+        
+        transactionGroup.setStatus(TransactionStatus.POSTED);
 
         transactionGroup.setInitiatedBy("SERVICE");
 
@@ -177,8 +185,7 @@ public class TransactionService {
         debitEntry.setTxnGroupId(
                 transactionGroup.getId());
 
-        debitEntry.setEntryType(
-                "DEBIT");
+        debitEntry.setEntryType(EntryType.DEBIT);
 
         debitEntry.setAmount(
                 request.getAmount());
@@ -201,10 +208,9 @@ public class TransactionService {
 
         creditEntry.setAccount(creditAccount);
 
-        creditEntry.setTxnGroupId(
-                transactionGroup.getId());
+        creditEntry.setTxnGroupId(transactionGroup.getId());
 
-        creditEntry.setEntryType("CREDIT");
+        creditEntry.setEntryType(EntryType.CREDIT);
 
         creditEntry.setAmount(request.getAmount());
 
@@ -301,5 +307,126 @@ public class TransactionService {
             throw new IllegalArgumentException(
                     "Debit and credit accounts cannot be same");
         }
+    }
+    
+    @Transactional
+    public void reverseTransaction(String externalRef, String initiatedBy) {
+
+    	// 1. Fetch original transaction group
+    	TransactionGroup originalGroup =
+    	        transactionGroupRepository.findByExternalRef(externalRef)
+    	                .orElseThrow(() ->
+    	                        new TransactionNotFoundException(
+    	                                "Transaction not found: " + externalRef));
+
+    	// 2. Check original transaction status
+    	if (originalGroup.getStatus() != TransactionStatus.POSTED) {
+
+    	    throw new InvalidTransactionStatusException(
+    	            "Only POSTED transactions can be reversed");
+    	}
+
+    	// 3. Check whether reversal already exists
+    	String reversalExternalRef = "REV-" + externalRef;
+
+    	if (transactionGroupRepository.existsByExternalRef(reversalExternalRef)) {
+
+    	    throw new TransactionAlreadyReversedException(
+    	            "Transaction already reversed: " + externalRef);
+    	}
+
+        // 4. Fetch ledger entries belonging to original transaction
+        List<LedgerEntry> originalEntries = ledgerEntryRepository.findByTxnGroupId( originalGroup.getId());
+
+        // 5. Settlement check
+        if (originalEntries.size() > 2) {
+
+            throw new RuntimeException(
+                    "Transaction contains more than two ledger entries. "
+                    + "Settlement is already cleared and cannot be reversed.");
+        }
+
+        // Also make sure we actually have the expected double-entry
+        if (originalEntries.size() != 2) {
+
+            throw new RuntimeException(
+                    "Invalid transaction. Expected exactly two ledger entries.");
+        }
+
+        // 6. Create REV transaction group with IN_PROGRESS
+        TransactionGroup reversalGroup = new TransactionGroup();
+
+        reversalGroup.setExternalRef(reversalExternalRef);
+        reversalGroup.setType("REVERSAL");
+        reversalGroup.setStatus(TransactionStatus.IN_PROGRESS);
+        reversalGroup.setInitiatedBy(initiatedBy);
+        reversalGroup.setCreatedAt(LocalDateTime.now());
+
+        reversalGroup = transactionGroupRepository.save(reversalGroup);
+
+        // 7. Reverse both ledger entries
+        for (LedgerEntry originalEntry : originalEntries) {
+
+        	Account account = accountRepository.findById(originalEntry.getAccount().getId()
+        	).orElseThrow(() ->
+        	        new RuntimeException(
+        	                "Account not found: "
+        	                + originalEntry.getAccount().getId()
+        	        )
+        	);
+
+            BigDecimal amount = originalEntry.getAmount();
+
+            BigDecimal currentBalance = account.getAvailableBalance();
+
+            LedgerEntry reversalEntry = new LedgerEntry();
+
+            reversalEntry.setAccount(account);
+            reversalEntry.setTxnGroupId(reversalGroup.getId());
+
+            // DEBIT becomes CREDIT
+            if (originalEntry.getEntryType() == EntryType.DEBIT) {
+
+                reversalEntry.setEntryType(EntryType.CREDIT);
+
+                BigDecimal newBalance = currentBalance.add(amount);
+
+                account.setAvailableBalance(newBalance);
+                account.setLedgerBalance(account.getLedgerBalance().add(amount));
+                reversalEntry.setBalanceAfter(newBalance);
+
+            }
+
+            // CREDIT becomes DEBIT
+            else {
+
+                reversalEntry.setEntryType(EntryType.DEBIT);
+
+                BigDecimal newBalance = currentBalance.subtract(amount);
+
+                account.setAvailableBalance(newBalance);
+                account.setLedgerBalance( account.getLedgerBalance().subtract(amount));
+                reversalEntry.setBalanceAfter(newBalance);
+            }
+
+            reversalEntry.setAmount(amount);
+            reversalEntry.setNarration("Reversal of transaction " + externalRef);
+            reversalEntry.setExternalRef(reversalExternalRef);
+            reversalEntry.setCreatedAt(LocalDateTime.now());
+
+            ledgerEntryRepository.save(reversalEntry);
+
+            accountRepository.save(account);
+        }
+
+        // 8. Mark reversal transaction as REVERSED
+        reversalGroup.setStatus(TransactionStatus.REVERSED);
+
+        transactionGroupRepository.save(reversalGroup);
+
+        // 9. Mark original transaction as REVERSED
+        originalGroup.setStatus(TransactionStatus.REVERSED);
+
+        transactionGroupRepository.save(originalGroup);
     }
 }

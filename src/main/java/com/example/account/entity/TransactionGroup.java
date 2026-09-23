@@ -22,8 +22,8 @@ public class TransactionGroup {
     @Column(name = "type", nullable = false)
     private String type;
 
-    @Column(name = "status", nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus status;
 
     @Column(name = "initiated_by", nullable = false)
     private String initiatedBy;
@@ -56,11 +56,11 @@ public class TransactionGroup {
         this.type = type;
     }
 
-    public String getStatus() {
+    public TransactionStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(TransactionStatus status) {
         this.status = status;
     }
 
@@ -75,4 +75,9 @@ public class TransactionGroup {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
+	public void setCreatedAt(LocalDateTime now) {
+		// TODO Auto-generated method stub
+		
+	}
 }

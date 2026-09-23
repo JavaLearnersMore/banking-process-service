@@ -22,8 +22,8 @@ public class LedgerEntry {
     @Column(name = "txn_group_id", nullable = false)
     private Long txnGroupId;
 
-    @Column(name = "entry_type", nullable = false)
-    private String entryType;
+    @Enumerated(EnumType.STRING)
+    private EntryType entryType;
 
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
@@ -65,11 +65,11 @@ public class LedgerEntry {
         this.txnGroupId = txnGroupId;
     }
 
-    public String getEntryType() {
+    public EntryType getEntryType() {
         return entryType;
     }
 
-    public void setEntryType(String entryType) {
+    public void setEntryType(EntryType entryType) {
         this.entryType = entryType;
     }
 
@@ -107,5 +107,9 @@ public class LedgerEntry {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

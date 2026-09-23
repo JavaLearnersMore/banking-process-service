@@ -184,6 +184,36 @@
     </div>
 
 </div>
+<!-- REVERSE TRANSACTION FORM -->
+<div class="account-section">
+
+    <div class="account-form-container">
+
+        <h2>Reverse Transaction</h2>
+
+        <form id="reverseTransactionForm">
+
+            <label>Original External Reference</label>
+
+            <input type="text"
+                   id="reverseExternalRef"
+                   name="reverseExternalRef"
+                   placeholder="PGTXN20260823101500ABCDEF"
+                   required>
+
+            <button type="submit">
+                Reverse Transaction
+            </button>
+
+        </form>
+
+        <div id="reverseTransactionResponseMessage"
+             class="response-message">
+        </div>
+
+    </div>
+
+</div>
  
 </div>
 
@@ -488,6 +518,94 @@ document.getElementById("statementForm")
             document.getElementById(
                 "statementResponseMessage"
             ).innerHTML =
+                "<h3>Request Failed</h3>" +
+                "<pre>" +
+                error.message +
+                "</pre>";
+        });
+
+    });
+    
+/* REVERSE TRANSACTION API */
+
+document.getElementById("reverseTransactionForm")
+    .addEventListener("submit", function(event) {
+
+        event.preventDefault();
+
+        const externalRef =
+            document.getElementById("reverseExternalRef")
+                .value
+                .trim();
+
+        const responseMessage =
+            document.getElementById(
+                "reverseTransactionResponseMessage"
+            );
+
+        if (!externalRef) {
+
+            responseMessage.innerHTML =
+                "<h3>Validation Failed</h3>" +
+                "<pre>External Reference is required</pre>";
+
+            return;
+        }
+
+        const url =
+            "${pageContext.request.contextPath}"
+            + "/core/api/v1/transactions/"
+            + encodeURIComponent(externalRef)
+            + "/reverse";
+
+
+        fetch(url, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            }
+
+        })
+
+        .then(async response => {
+
+            const data = await response.json();
+
+            console.log(
+                "Reverse Transaction Response:",
+                data
+            );
+
+
+            if (response.ok) {
+
+                responseMessage.innerHTML =
+                    "<h3>Transaction Reversed Successfully</h3>" +
+                    "<pre>" +
+                    JSON.stringify(data, null, 2) +
+                    "</pre>";
+
+            } else {
+
+                responseMessage.innerHTML =
+                    "<h3>Transaction Reversal Failed</h3>" +
+                    "<pre>" +
+                    JSON.stringify(data, null, 2) +
+                    "</pre>";
+            }
+
+        })
+
+        .catch(error => {
+
+            console.error(
+                "Reverse Transaction Error:",
+                error
+            );
+
+            responseMessage.innerHTML =
                 "<h3>Request Failed</h3>" +
                 "<pre>" +
                 error.message +

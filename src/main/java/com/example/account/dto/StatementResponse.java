@@ -3,9 +3,11 @@ package com.example.account.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.example.account.entity.EntryType;
+
 public class StatementResponse {
 
-    private String entryType;
+    private EntryType entryType;
     private BigDecimal amount;
     private BigDecimal balanceAfter;
     private String narration;
@@ -13,7 +15,7 @@ public class StatementResponse {
     private LocalDateTime createdAt;
 
     public StatementResponse(
-            String entryType,
+    		EntryType entryType,
             BigDecimal amount,
             BigDecimal balanceAfter,
             String narration,
@@ -28,11 +30,11 @@ public class StatementResponse {
         this.createdAt = createdAt;
     }
 
-	public String getEntryType() {
+	public EntryType getEntryType() {
 		return entryType;
 	}
 
-	public void setEntryType(String entryType) {
+	public void setEntryType(EntryType entryType) {
 		this.entryType = entryType;
 	}
 

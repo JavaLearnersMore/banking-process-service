@@ -3,6 +3,7 @@ import javax.persistence.LockModeType;
 
 
 import com.example.account.entity.Account;
+import com.example.account.entity.TransactionGroup;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,5 +19,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Account> findWithLockByAccountNumber(String accountNumber);
+
+//	ptional<TransactionGroup> findByAccountNumber(Account account);
 
 }

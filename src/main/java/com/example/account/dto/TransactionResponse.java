@@ -1,10 +1,12 @@
 package com.example.account.dto;
 
+import com.example.account.entity.TransactionStatus;
+
 public class TransactionResponse {
 
     private Long transactionGroupId;
     private String externalRef;
-    private String status;
+    private TransactionStatus status;
     private String message;
 
     public TransactionResponse() {
@@ -13,7 +15,7 @@ public class TransactionResponse {
     public TransactionResponse(
             Long transactionGroupId,
             String externalRef,
-            String status,
+            TransactionStatus status,
             String message) {
 
         this.transactionGroupId = transactionGroupId;
@@ -30,7 +32,7 @@ public class TransactionResponse {
         return externalRef;
     }
 
-    public String getStatus() {
+    public TransactionStatus getStatus() {
         return status;
     }
 
